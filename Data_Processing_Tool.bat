@@ -1,0 +1,2 @@
+cd Data_Processing_Tool
+sbt run
