@@ -37,8 +37,8 @@ All the files share one of the following naming conventions: *fileName_timeWindo
 To calculate the ANN model performance you should select from the dropdown lists the model and the testing set. To calculate the predictions all the parameters should be introduced or selected. Parameters list:
 1) **Model.** The model of an ANN to be used in the calculations. The naming convention used for the model is: *modelName_MeanSquaredErrorOnValidationSetMultipliedBy10000*.
 2) **Test set.** The testing set that contains the data to be used in the in the calculations.
-3) **Shop ID.** The ID of the shop (Integer) you want to get the results for.
-4) **Item ID.** The ID of the item (Integer) you want to get the results for.
+3) **Shop ID.** The ID of the shop you want to get the results for.
+4) **Item ID.** The ID of the item you want to get the results for.
 5) **Precision.** The number of possible prices to be checked (Integer).
 6) **Max. price multiplicator.** The mean price among all the shops for the selected product is multiplied by this parameter (Double) to get the maximum possible price to calculate the sales predictions for.
 7) **Delta multiplicator.** The differences in sales between the possible prices (between 0 and the maximum price) are multiplied by this parameter (Double) to get enhance the slope. This is only taken in to account by the optimized algorithm.
