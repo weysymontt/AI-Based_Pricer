@@ -1,6 +1,6 @@
 # Artificial Intelligence Based Pricer
 ## Introduction
-This project consists of two applications. The "Data Processing Tool" and the "Pricer App".
+This project consists of two applications. The "Data Processing Tool" and the "Pricer App". In the Pricer_App directory you can also find ANN_development.py file which can be used to create new ANN models.
 
 #### Data Processing Tool
 This program is used to treat and transform the data into two csv files (training and testing sets) with variables as columns and observations as rows. Both are meant to be treated afterwards in ANN_development.py file located in Pricer_App directory to get standarized, shuffled and the shuffled training set also devided in training and validation sets. After these modifications and within the same python file an artificial neural network can be developed.
