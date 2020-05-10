@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <option name="postfixOps" value="true" />
+    <profile name="sbt 1" modules="AI_Pricing_Project,Data_Processing_Tool,Spark-flight-delay,spark-flight-delay_4396" />
+  </component>
+</project>
