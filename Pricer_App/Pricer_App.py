@@ -19,7 +19,7 @@ import os
 import pandas as pd
 import numpy as np
 import ANN_predictions
-os.chdir('C:\Master\TFM\Artificial_Intelligence_Based_Pricer\Pricer_App')
+os.chdir('C:\Github_repositories\AI_Based_Pricer\Pricer_App')
 
 
 class Product:

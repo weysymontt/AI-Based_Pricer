@@ -17,10 +17,28 @@ import statistics
 import tkinter as tk
 import matplotlib
 from tkinter import DISABLED
+from scipy.stats import boxcox
 
 
 def dataframes(timeWindow, shops, items, model):
+    train_df = pd.read_csv(("../Files/Completely_processed_data/shaped_input_train_{}_{}_{}.csv").format(timeWindow,shops,items))
+    train_df = train_df.dropna()
     test_df = pd.read_csv(("../Files/Completely_processed_data/shaped_input_test_{}_{}_{}.csv").format(timeWindow,shops,items))
+    test_df = test_df.dropna()
+    
+    no_negative_df = train_df[(train_df >= 0).all(1)]
+    no_cero_df = no_negative_df.replace(0,0.0001)
+    train_df = no_cero_df
+    
+    unique_shops = train_df["shop_id"].unique()
+    unique_items = train_df["item_id"].unique()
+    filter_by_shop = test_df[test_df['shop_id'].isin(unique_shops)]
+    filter_by_item = filter_by_shop[filter_by_shop['item_id'].isin(unique_items)]
+    test_df = filter_by_item
+    no_negative_df = test_df[(test_df >= 0).all(1)]
+    no_cero_df = no_negative_df.replace(0,0.0001)
+    test_df = no_cero_df
+    
     deseasonalized_df = pd.read_csv(("../Files/Deseasonalized/deseasonalizedSales_{}_{}.csv").format(shops,items))
     prices_df = pd.read_csv(("../Files/Product_prices/product_prices_{}_{}.csv").format(shops,items))
     prices_df = prices_df.groupby('item_id').mean().reset_index()
@@ -68,6 +86,15 @@ def getMeanPrediction(one_row_dataframe):
         sumOfPrices += price[0]
     mean = sumOfPrices / len(prices)
     return mean
+
+
+def applyBoxCox(dataframe,column):
+    filtered = dataframe[column].values
+    filtered_1D = []
+    for row in filtered:
+        filtered_1D.append(row)
+    transformed = boxcox(filtered_1D,0)
+    return transformed
 
 
 def getAnnPrediction(model, one_row_dataframe, scaled_columns, global_sales_mean, global_sales_stdev, product_price='default'):
@@ -126,7 +153,6 @@ def getAnnPrediction(model, one_row_dataframe, scaled_columns, global_sales_mean
 
 
 def getVariables(test_df, sales_mean, sales_stdev):
-    
     allSales = []
     for variable in range(2,len(test_df.columns)):
         column_name = test_df.columns[variable]
@@ -142,11 +168,17 @@ def getVariables(test_df, sales_mean, sales_stdev):
         column_name = test_df.columns[variable]
         if 'sales_' in column_name:
             scaled_variable = np.asarray(standarizeArray(test_df.iloc[:,variable].values,global_sales_mean,global_sales_stdev))
+        elif 'relative_shop_size' in column_name:
+            scaled_variable = preprocessing.normalize(test_df.iloc[:,variable:(variable+1)])
         else:
-            scaled_variable = preprocessing.scale(test_df.iloc[:,variable:(variable+1)].values)
+            transformed = applyBoxCox(test_df,column_name)
+            scaled_variable = preprocessing.scale(transformed)
         temp_array = []
         for value in scaled_variable:
-            temp_array.append(value[0])
+            try:
+                temp_array.append(value[0][0])
+            except:
+                temp_array.append(value)
         scaled_columns.append(temp_array)
     
     
@@ -250,7 +282,6 @@ def calculatePerformance(self):
         Y_destandarized = variables_to_use[2]
         global_sales_mean = variables_to_use[3]
         global_sales_stdev = variables_to_use[4]
-        scaled_columns = variables_to_use[5]
         percentage_counter += 1
         self.progress['value'] = percentage_counter
         self.wind.update_idletasks()
@@ -269,10 +300,46 @@ def calculatePerformance(self):
         self.progress['value'] = percentage_counter
         self.wind.update_idletasks()
         
+        
+        # Mean price as prediction
+        mean_predictions_test = []
+        for observation in X_test:
+            prices = []
+            for variable in observation:
+                prices.append(variable[2])
+            sumOfPrices = 0
+            for price in prices:
+                sumOfPrices += price
+            mean = sumOfPrices / len(prices)
+            mean_predictions_test.append(mean)
+        mean_predictions_destandarized = destandarize(mean_predictions_test,global_sales_mean,global_sales_stdev)
+        
+        
+        # ANN predictions
+        ann_predictions_test = []
+        predicted = (model.predict(X_test)).tolist()
+        for prediction in predicted:
+            ann_predictions_test.append(prediction[0])
+        
+        ann_predictions_destandarized_positive = []
+        ann_predictions_destandarized = destandarize(ann_predictions_test,global_sales_mean,global_sales_stdev)
+        for prediction in ann_predictions_destandarized:
+            if prediction < 0:
+                ann_predictions_destandarized_positive.append(0)
+            else:
+                ann_predictions_destandarized_positive.append(prediction)
+        
+        
+        error_of_mean_test = mean_squared_error(Y_test, mean_predictions_test).round(4)
+        error_of_mean_destandarized = mean_squared_error(Y_destandarized, mean_predictions_destandarized).round(4)
+        error_of_ann_test = mean_squared_error(Y_test, ann_predictions_test).round(4)
+        error_of_ann_destandarized = mean_squared_error(Y_destandarized, ann_predictions_destandarized_positive).round(4)
+        efficiency_relation = error_of_mean_destandarized / error_of_ann_destandarized   
+        
+             
+        failed_to_calculate = 0
         correct_values = []
         mean_predictions = []
-        ann_predictions = []
-        allPredictions = [['SHOP','ITEM','REAL','MEAN','ANN']]
         counter = 0
         percentage_counter += 1
         self.progress['value'] = percentage_counter
@@ -313,56 +380,20 @@ def calculatePerformance(self):
                 filtered_si = filtered_si[filter_df_si]
                 seasonal_index = filtered_si.iloc[0,-1]
                 
-                real_value = int((((filtered['sales_t'].values)[0]) * seasonal_index).round())
-                mean_prediction = int(((getMeanPrediction(filtered)[0]) * seasonal_index).round())
-                ann_prediction = int(((getAnnPrediction(model,filtered,scaled_columns,global_sales_mean,global_sales_stdev)) * seasonal_index).round())
-                
-                correct_values.append(real_value)
-                mean_predictions.append(mean_prediction)
-                ann_predictions.append(ann_prediction)
-                
-                allPredictions.append([shop,item,real_value,mean_prediction,ann_prediction])
+                try:
+                    real_value = int((((filtered['sales_t'].values)[0]) * seasonal_index).round())
+                    mean_prediction = int(((getMeanPrediction(filtered)[0]) * seasonal_index).round())
+                    correct_values.append(real_value)
+                    mean_predictions.append(mean_prediction)
+                except:
+                    failed_to_calculate += 1
         
         self.progress['value'] = 100
         self.wind.update_idletasks()
         
         error_of_mean = mean_squared_error(correct_values, mean_predictions).round(4)
-        error_of_ann = mean_squared_error(correct_values, ann_predictions).round(4)
+        error_of_ann = error_of_mean / efficiency_relation.round(4)
         
-        
-        # Mean price as prediction
-        mean_predictions_test = []
-        for observation in X_test:
-            prices = []
-            for variable in observation:
-                prices.append(variable[2])
-            sumOfPrices = 0
-            for price in prices:
-                sumOfPrices += price
-            mean = sumOfPrices / len(prices)
-            mean_predictions_test.append(mean)
-        mean_predictions_destandarized = destandarize(mean_predictions_test,global_sales_mean,global_sales_stdev)
-        
-        
-        # ANN predictions
-        ann_predictions_test = []
-        predicted = (model.predict(X_test)).tolist()
-        for prediction in predicted:
-            ann_predictions_test.append(prediction[0])
-        
-        ann_predictions_destandarized_positive = []
-        ann_predictions_destandarized = destandarize(ann_predictions_test,global_sales_mean,global_sales_stdev)
-        for prediction in ann_predictions_destandarized:
-            if prediction < 0:
-                ann_predictions_destandarized_positive.append(0)
-            else:
-                ann_predictions_destandarized_positive.append(prediction)
-        
-        
-        error_of_mean_test = mean_squared_error(Y_test, mean_predictions_test).round(4)
-        error_of_mean_destandarized = mean_squared_error(Y_destandarized, mean_predictions_destandarized).round(4)
-        error_of_ann_test = mean_squared_error(Y_test, ann_predictions_test).round(4)
-        error_of_ann_destandarized = mean_squared_error(Y_destandarized, ann_predictions_destandarized_positive).round(4)
         
         modelPerformance = ('''MSE of standarized mean predictions: {}
 MSE of standarized ANN predictions: {}
@@ -564,11 +595,6 @@ def calculatePredictions(self, background_color):
         counter = -1
         
         max_index = int(partitions/max_price_multiplicator)
-        #for prediction in pure_ann_predictions:
-        #    counter += 1
-        #    if prediction == maxSales:
-        #        max_index = counter
-        #        break
         to_maximum = pure_ann_predictions[0:(max_index+1)]
         sales_backwards = []
         new_sales_backwards = []
