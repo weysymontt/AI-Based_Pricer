@@ -22,9 +22,9 @@ This program is based on artificial neural network and it predicts optimal price
 2) Double click on Data_Processing_Tool.bat.
 
 #### Pricer App
-1) You should have insalled and set up in your local machine: Anaconda3 and keras (python library). The Pricer_App.bat calls to anaconda prompt, so if you don't have it, you can run the app from your IDE or modify the Pricer_App.bat.
-2) Open the Pricer_App.bat file with any text redactor and in line 4 modify the path to the one where the file is located.
-3) Perform the same action in line 22 of the Pricer_App/Pricer_App.py file.
+1) You should have insalled and set up in your local machine: Anaconda3 distribution, keras and tensorflow python libryries (both should be installed with conda, not pip). The Pricer_App.bat calls to anaconda prompt, so if you don't have it, you can run the app from your IDE or modify the Pricer_App.bat.
+2) Open the Pricer_App.bat file with any text redactor and in line 4 modify the path to the one where the Pricer_App.py file is located.
+3) Perform the same action in line 22 of the Pricer_App/Pricer_App.py file, but without Pricer_App.py in the path.
 2) Double click on Pricer_App.bat.
 <br/>
 
