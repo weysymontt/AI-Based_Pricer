@@ -1,7 +1,6 @@
 package Body
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.functions.col
 import java.io._
 import scala.io.Source
@@ -9,7 +8,6 @@ import scala.io.Source
 
 object SparkSessionCreator extends Serializable {
   def createSparkSession(): (SparkSession,Double,Double,Int) = {
-    val conf = new SparkConf().setAppName("pricer")
     val spark = SparkSession
       .builder
       .appName("pricer")

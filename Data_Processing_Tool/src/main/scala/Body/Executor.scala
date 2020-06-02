@@ -78,6 +78,7 @@ object Executor extends Serializable {
         firstTry = true
         while (!backToMainMenu && !callNext){
           while (!backToMainMenu && correctInputs != 3){
+            print("\u001b[2J")
             println("DATA PROCESSING TOOL")
             println()
             if (!firstTry){
@@ -149,14 +150,14 @@ object Executor extends Serializable {
                   val trainParameters = file.toString.split("shaped_input_train_").last.split(".csv")(0).split("_")
                   if (trainParameters(0).toInt == windowExtension && trainParameters(1).toInt == numberOfShopsToUse && trainParameters(2).toInt == numberOfItemsToUse){
                     trainMatches = true
-                    trainMatchingFile = "shaped_input_train" + file.toString.split("shaped_input").last
+                    trainMatchingFile = "shaped_input" + file.toString.split("shaped_input").last
                   }
                 }
                 else if (file.toString.contains("test")){
                   val testParameters = file.toString.split("shaped_input_test_").last.split(".csv")(0).split("_")
                   if (testParameters(0).toInt == windowExtension && testParameters(1).toInt == numberOfShopsToUse && testParameters(2).toInt == numberOfItemsToUse){
                     testMatches = true
-                    testMatchingFile = "shaped_input_test" + file.toString.split("shaped_input").last
+                    testMatchingFile = "shaped_input" + file.toString.split("shaped_input").last
                   }
                 }
               }

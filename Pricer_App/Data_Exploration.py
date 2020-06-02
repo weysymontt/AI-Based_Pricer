@@ -17,11 +17,6 @@ from scipy.stats import shapiro
 
 train_df = pd.read_csv("../Files/Completely_processed_data/shaped_input_train_5_30_100.csv")
 train_df = train_df.sample(frac=1).reset_index(drop=True)
-train_df.to_csv("../Files/Completely_processed_shuffled_data/shuffled_shaped_input_train_5_30_100.csv", index=False)
-
-test_df = pd.read_csv("../Files/Completely_processed_data/shaped_input_test_5_30_100.csv")
-test_df = test_df.sample(frac=1).reset_index(drop=True)
-test_df.to_csv("../Files/Completely_processed_shuffled_data/shuffled_shaped_input_test_5_30_100.csv", index=False)
 
 
 def getCorrelationsFilteredByShopsAndItems(dataframe,shops,items,parameter):
