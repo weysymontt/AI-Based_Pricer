@@ -43,7 +43,7 @@ To calculate the ANN model performance you should select from the dropdown lists
 4) **Item ID.** The ID of the item you want to get the results for.
 5) **Precision.** The number of possible prices to be checked (Integer).
 6) **Max. price multiplicator.** The mean price among all the shops for the selected product is multiplied by this parameter (Double) to get the maximum possible price to calculate the sales predictions for.
-7) **Delta multiplicator.** The differences in sales between the possible prices (between 0 and the maximum price) are multiplied by this parameter (Double) to get enhance the slope. This is only taken in to account by the optimized algorithm.
+7) **Delta multiplicator.** The differences in sales between the possible prices (between 0 and the maximum price) are multiplied by this parameter (Double) to enhance the slope. This is only taken in to account by the optimized algorithm.
 8) **Item cost.** The cost per sold item (Double).
 9) **Absolute / Mean price multiplicator.** Affects the "Item cost" parameter. If "absolute" is selected, the "Item cost" is considered to be expressed in money (Double). If "Mean price multiplicator" is selected, the "Item cost" is considered to be a multiplicator of the mean price and should have values between 0 and 1 (Double).
 10) **Fixed costs.** The total amount of the costs independent of the number of the units sold (Double).
